@@ -113,3 +113,11 @@ if (startButton) {
     startButton.style.display = "none";
   };
 }
+
+document.onclick = () => {
+  if (audioContext.state === "running") {
+    audioContext.suspend();
+  } else {
+    audioContext.resume();
+  }
+};
