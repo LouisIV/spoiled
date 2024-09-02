@@ -2,6 +2,7 @@ import {
   AudioSourceFactory,
   AudioSourceFactoryDependencies,
 } from "./audio-sources/factory";
+import { Microphone } from "./audio-sources/microphone";
 import { WebsocketAudio } from "./audio-sources/websocket";
 import { WebRTCManager } from "./connections/peer";
 import { Settings, getSettings } from "./settings";
@@ -88,7 +89,7 @@ async function applicationFactory() {
 
   butterchurn.render();
 
-  if (settings.playReceivedAudio) {
+  if (settings.playReceivedAudio && !(audioSource instanceof Microphone)) {
     const node = audioSource.getNode();
     node.connect(audioContext.destination);
   }
