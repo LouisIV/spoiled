@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <title>Cast</title>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+  </head>
+  <body>
+    <google-cast-launcher></google-cast-launcher>
+    <script>
+      initializeCastApi = function () {
+        cast.framework.CastContext.getInstance().setOptions({
+          receiverApplicationId: "8584C79D",
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+        });
+      };
+
+      window["__onGCastApiAvailable"] = function (isAvailable) {
+        if (isAvailable) {
+          initializeCastApi();
+        } else {
+          alert("Not available");
+        }
+      };
+
+      function send() {
+        var textEl = document.getElementById("text");
+        sendText(textEl.value);
+      }
+
+      function sendText(txt) {
+        var castSession =
+          cast.framework.CastContext.getInstance().getCurrentSession();
+        if (castSession) {
+          castSession.sendMessage("urn:x-cast:ch.cimnine.cromecast-test.text", {
+            type: "message",
+            text: txt,
+          });
+        }
+      }
+    </script>
+  </body>
+</html>
