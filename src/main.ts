@@ -87,15 +87,15 @@ async function applicationFactory() {
     await audioSource.incomingAudioAvailable();
   }
 
-  const butterchurn = new Butterchurn(
-    audioContext,
-    canvas as HTMLCanvasElement
-  );
-
-  const stream = await audioSource.getStream();
-  butterchurn.connectStream(stream);
-
   try {
+    const butterchurn = new Butterchurn(
+      audioContext,
+      canvas as HTMLCanvasElement
+    );
+
+    const stream = await audioSource.getStream();
+    butterchurn.connectStream(stream);
+
     butterchurn.render();
   } catch (err) {
     // Catch errors (for testing)
