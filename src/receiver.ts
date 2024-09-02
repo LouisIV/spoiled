@@ -89,7 +89,7 @@ export class ChromecastReceiver {
 
   private setCustomData(customData: CustomData) {
     this.customData = customData;
-    if (this.customDataResolve) {
+    if (customData && this.customDataResolve) {
       this.customDataResolve(this.customData);
       this.customDataResolve = undefined;
     }

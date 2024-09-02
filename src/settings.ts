@@ -30,6 +30,12 @@ export interface Settings {
   websocketUrl?: string;
 }
 
+export function encodeSettingsForCustomData(settings: Settings) {
+  const result = { ...settings } as any;
+  result["playReceivedAudio"] = `${settings.playReceivedAudio}`;
+  return result;
+}
+
 export async function getSettings(
   chromecast: ChromecastReceiver
 ): Promise<Settings> {

@@ -1,4 +1,5 @@
 import type { cast as Cast, framework } from "chromecast-caf-sender";
+import { Settings, encodeSettingsForCustomData } from "./settings";
 import { loadScript } from "./util/load-script";
 
 type Framework = typeof Cast.framework;
@@ -33,6 +34,8 @@ export class GoogleCastSender {
       "https://louisiv.github.io/spoiled",
       ""
     );
+
+    mediaInfo.customData = encodeSettingsForCustomData(this.settings);
 
     const castSession = this.castingContext.getCurrentSession();
 
@@ -99,7 +102,7 @@ export class GoogleCastSender {
     this.castMedia();
   }
 
-  constructor() {
+  constructor(protected settings: Settings) {
     this.loadCastAPI();
   }
 }
