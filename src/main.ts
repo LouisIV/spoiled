@@ -95,7 +95,12 @@ async function applicationFactory() {
   const stream = await audioSource.getStream();
   butterchurn.connectStream(stream);
 
-  butterchurn.render();
+  try {
+    butterchurn.render();
+  } catch (err) {
+    // Catch errors (for testing)
+    console.error(err);
+  }
 
   if (settings.playReceivedAudio && !(audioSource instanceof Microphone)) {
     const node = audioSource.getNode();
