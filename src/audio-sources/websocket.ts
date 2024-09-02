@@ -8,6 +8,10 @@ export class WebsocketAudio implements AudioSource {
     protected webSocket: WebSocket
   ) {}
 
+  getNode(): AudioNode {
+    return this.audioWorkletNode;
+  }
+
   async loadAudioWorklet() {
     // Load the worklet module
     await this.audioContext.audioWorklet.addModule(
@@ -21,14 +25,6 @@ export class WebsocketAudio implements AudioSource {
     );
 
     console.log("Loaded audio worklet");
-
-    // Connect to the destination (speakers)
-    this.connectToSpeakers();
-  }
-
-  connectToSpeakers() {
-    // Connect to the destination (speakers)
-    this.audioWorkletNode.connect(this.audioContext.destination);
   }
 
   private handleWebSocketMessages() {
@@ -74,11 +70,10 @@ export class WebsocketAudio implements AudioSource {
     };
   }
 
-  getStream(callback: (stream: MediaStream) => void): void {
+  getStream(): Promise<MediaStream> {
     this.handleWebSocketMessages();
-
     const destinationNode = this.audioContext.createMediaStreamDestination();
     this.audioWorkletNode.connect(destinationNode);
-    callback(destinationNode.stream);
+    return Promise.resolve(destinationNode.stream);
   }
 }

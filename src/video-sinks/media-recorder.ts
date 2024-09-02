@@ -1,3 +1,5 @@
+import { SupportsAudioStream } from "../connections/attributes";
+import { Connection } from "../connections/types";
 import { VideoSink } from "./types";
 
 interface MediaRecorderSinkOptions {
@@ -12,12 +14,12 @@ const defaultOptions: MediaRecorderSinkOptions = {
   segmentLength: 5000,
 };
 
-export class MediaRecorderSink implements VideoSink {
+export class MediaRecorderSink implements VideoSink, SupportsAudioStream {
   frameRate: number;
   mimeType: string;
   segmentLength: number;
-  socket: WebSocket;
-  audioStream: MediaStream | undefined;
+  audioStream?: MediaStream;
+  connection: Connection;
 
   private makeOptions(options?: Partial<MediaRecorderSinkOptions>) {
     return {
@@ -26,15 +28,17 @@ export class MediaRecorderSink implements VideoSink {
     };
   }
   constructor(
-    socket: WebSocket,
-    options?: Partial<MediaRecorderSinkOptions>,
-    audioStream?: MediaStream
+    connection: Connection,
+    options?: Partial<MediaRecorderSinkOptions>
   ) {
     const opts = this.makeOptions(options);
-    this.socket = socket;
+    this.connection = connection;
     this.frameRate = opts.frameRate;
     this.mimeType = opts.mimeType;
     this.segmentLength = opts.segmentLength;
+  }
+
+  addAudioStream(audioStream: MediaStream): void {
     this.audioStream = audioStream;
   }
 
@@ -52,37 +56,6 @@ export class MediaRecorderSink implements VideoSink {
     return videoStream;
   }
 
-  private sendSegmentInChunks(segmentBlob: Blob) {
-    const chunkSize = 64 * 1024; // 64KB chunks
-    const timestamp = Date.now(); // Current timestamp in milliseconds
-
-    const totalChunks = Math.ceil(segmentBlob.size / chunkSize);
-
-    console.log({ totalChunks, timestamp });
-
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, segmentBlob.size);
-      const chunk = segmentBlob.slice(start, end);
-
-      // Create metadata with timestamp as a Uint8Array
-      const metadata = new ArrayBuffer(12);
-      const view = new DataView(metadata);
-      view.setUint32(0, timestamp); // Timestamp (4 bytes)
-      view.setUint16(4, i); // Chunk index (2 bytes)
-      view.setUint16(6, totalChunks); // Total chunks (2 bytes)
-      view.setUint32(8, end - start); // Chunk size (4 bytes)
-
-      // Create a Blob with the metadata and the chunk
-      const dataToSend = new Blob([metadata, chunk]);
-
-      // Send chunk over WebSocket
-      this.socket.send(dataToSend);
-    }
-
-    console.log("finished sending chunk");
-  }
-
   captureVideoStream(canvas: HTMLCanvasElement): void {
     const stream = this.getFinalStream(canvas);
 
@@ -95,7 +68,7 @@ export class MediaRecorderSink implements VideoSink {
     mediaRecorder.ondataavailable = (event) => {
       // Send the data chunk over the WebSocket connection
       if (event.data && event.data.size > 0) {
-        this.sendSegmentInChunks(event.data);
+        this.connection.handleSegment(event);
       }
     };
 

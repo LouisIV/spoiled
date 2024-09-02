@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/chromecast-caf-receiver": "^6.0.17",
     "@types/simple-peer": "^9.11.8",
     "typescript": "^5.5.3",
     "vite": "^5.4.1"

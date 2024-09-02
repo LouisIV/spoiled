@@ -31,16 +31,16 @@
     </style>
   </head>
   <body>
-    <!-- <script>
-      var global = global || window;
-    </script>
-    <script src="simplepeer.min.js"></script> -->
-    <canvas id="visualizerCanvas" width="1920" height="1080"> </canvas>
+    <!-- Google Cast Receiver SDK -->
+    <script
+      type="text/javascript"
+      src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"
+    ></script>
+
+    <canvas id="visualizerCanvas" width="1920" height="1080"></canvas>
     <!-- Audio element to play audio stream -->
     <audio id="audioElement" controls autoplay></audio>
-
     <script type="module" src="/src/main.ts"></script>
-
-    <button id="start">Start</button>
+    <!-- <button id="start">Start</button> -->
   </body>
 </html>

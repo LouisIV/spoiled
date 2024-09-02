@@ -3,10 +3,13 @@ import { AudioSource } from "./types";
 export class Microphone implements AudioSource {
   constructor(protected audioContext: AudioContext) {}
 
-  getStream(callback: (stream: MediaStream) => void): void {
+  getNode(): AudioNode {
+    throw new Error("Microphone cannot provide audio node");
+  }
+
+  async getStream(): Promise<MediaStream> {
     // get audioNode from audio source or microphone
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      callback(stream);
-    });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    return stream;
   }
 }

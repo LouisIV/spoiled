@@ -1,11 +1,16 @@
+import {
+  AudioSourceFactory,
+  AudioSourceFactoryDependencies,
+} from "./audio-sources/factory";
 import { WebsocketAudio } from "./audio-sources/websocket";
-import { MediaRecorderSink } from "./video-sinks/media-recorder";
+import { WebRTCManager } from "./connections/peer";
+import { Settings, getSettings } from "./settings";
+import { VideoSinkFactory } from "./video-sinks/factory";
+import { VideoSinkType } from "./video-sinks/types";
 import { Butterchurn } from "./visualizer";
 
 // @ts-expect-error
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-console.log({ audioContext });
 
 const canvas = document.getElementById("visualizerCanvas");
 
@@ -35,38 +40,75 @@ const canvas = document.getElementById("visualizerCanvas");
 
 // videoSink.captureVideoStream(canvas as HTMLCanvasElement);
 
-const socket = new WebSocket("ws://localhost:5187");
+function createDependencies(
+  audioContext: AudioContext,
+  settings: Settings
+): AudioSourceFactoryDependencies {
+  const dependencies: AudioSourceFactoryDependencies = {};
 
-const audioSource = new WebsocketAudio(audioContext, socket);
+  if (settings.signalingServerUrl) {
+    dependencies.webRTC = new WebRTCManager(audioContext, {
+      signalingServerUrl: settings.signalingServerUrl,
+    });
+  }
 
-await audioSource.loadAudioWorklet();
+  if (settings.websocketUrl) {
+    dependencies.socket = new WebSocket(settings.websocketUrl);
+  }
 
-const videoSink = new MediaRecorderSink(socket, {
-  frameRate: 30,
-});
-
-// const audioSource = new Microphone(
-//   audioContext
-//   // "http://localhost:3000/Catherine Miller Hunchin Master 114bpm.wav"
-// );
-
-const butterchurn = new Butterchurn(audioContext, canvas as HTMLCanvasElement);
-
-// window.addEventListener("load", () => {
-//   butterchurn.resize();
-// });
-
-audioSource.getStream((stream) => butterchurn.connectStream(stream));
-butterchurn.render();
-
-videoSink.captureVideoStream(canvas as HTMLCanvasElement);
-
-const startButton = document.getElementById("start");
-if (!startButton) {
-  throw new Error("button not found");
+  return dependencies;
 }
 
-startButton.onclick = (ev) => {
-  audioContext.resume();
-  startButton.style.display = "none";
-};
+async function applicationFactory() {
+  const settings = await getSettings();
+
+  const dependencies = createDependencies(audioContext, settings);
+
+  const audioSourceFactory = new AudioSourceFactory(audioContext, dependencies);
+  const audioSource = audioSourceFactory.createAudioSource(
+    settings.audioSource,
+    settings
+  );
+
+  if (audioSource instanceof WebsocketAudio) {
+    await audioSource.loadAudioWorklet();
+  }
+
+  if (audioSource instanceof WebRTCManager) {
+    await audioSource.incomingAudioAvailable();
+  }
+
+  const butterchurn = new Butterchurn(
+    audioContext,
+    canvas as HTMLCanvasElement
+  );
+
+  const stream = await audioSource.getStream();
+  butterchurn.connectStream(stream);
+
+  butterchurn.render();
+
+  if (settings.playReceivedAudio) {
+    const node = audioSource.getNode();
+    node.connect(audioContext.destination);
+  }
+
+  if (settings.videoSink) {
+    const videoSinkFactory = new VideoSinkFactory();
+    const videoSink = videoSinkFactory.createVideoSink(
+      VideoSinkType.MediaRecorder
+    );
+
+    videoSink?.captureVideoStream(canvas as HTMLCanvasElement);
+  }
+}
+
+applicationFactory();
+
+const startButton = document.getElementById("start");
+if (startButton) {
+  startButton.onclick = () => {
+    audioContext.resume();
+    startButton.style.display = "none";
+  };
+}
