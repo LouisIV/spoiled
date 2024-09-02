@@ -4,7 +4,9 @@ import {
 } from "./audio-sources/factory";
 import { Microphone } from "./audio-sources/microphone";
 import { WebsocketAudio } from "./audio-sources/websocket";
+import { GoogleCastSender } from "./cast";
 import { WebRTCManager } from "./connections/peer";
+import { ChromecastReceiver } from "./receiver";
 import { Settings, getSettings } from "./settings";
 import { VideoSinkFactory } from "./video-sinks/factory";
 import { VideoSinkType } from "./video-sinks/types";
@@ -61,7 +63,13 @@ function createDependencies(
 }
 
 async function applicationFactory() {
-  const settings = await getSettings();
+  const chromecast = new ChromecastReceiver();
+
+  const settings = await getSettings(chromecast);
+
+  if (!chromecast.isTv()) {
+    new GoogleCastSender();
+  }
 
   const dependencies = createDependencies(audioContext, settings);
 

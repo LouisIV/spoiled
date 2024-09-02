@@ -30,13 +30,14 @@ export interface Settings {
   websocketUrl?: string;
 }
 
-export async function getSettings(): Promise<Settings> {
+export async function getSettings(
+  chromecast: ChromecastReceiver
+): Promise<Settings> {
   const settings: Settings = {
     audioSource: AudioSourceType.Microphone,
     playReceivedAudio: true,
   };
 
-  const chromecast = new ChromecastReceiver();
   if (chromecast.isTv()) {
     console.log("Determined to be running on TV");
     const customData: Record<string, any> | undefined =

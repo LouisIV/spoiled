@@ -1,0 +1,32 @@
+diff --git a/index.d.ts b/index.d.ts
+index 425ad401064ad28b795323bbb1838938a12a7531..4781da52734130234f6f5ec2c8bcc43f27c69600 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -4,10 +4,17 @@
+ // Global object
+ ////////////////////
+ interface Window {
+-    cast: typeof cast;
++    // cast: typeof cast;
+     __onGCastApiAvailable(available: boolean, reason?: string): void;
+ }
+ 
++export namespace cast {
++    const framework: typeof frameworkNs;
++}
++
++
++export {  frameworkNs as framework };
++
+ ////////////////////
+ // Framework
+ ////////////////////
+@@ -15,7 +22,7 @@ interface Window {
+  * Cast Application Framework
+  * @see https://developers.google.com/cast/docs/reference/chrome/cast.framework
+  */
+-declare namespace cast.framework {
++declare namespace frameworkNs {
+     enum LoggerLevel {
+         DEBUG,
+         INFO,

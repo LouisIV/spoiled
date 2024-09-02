@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@types/chromecast-caf-sender@1.0.10':
+    hash: i4krnp2tujjy7m5t3eetgu6qby
+    path: patches/@types__chromecast-caf-sender@1.0.10.patch
+
 dependencies:
   butterchurn:
     specifier: ^2.6.7
@@ -19,6 +24,9 @@ devDependencies:
   '@types/chromecast-caf-receiver':
     specifier: ^6.0.17
     version: 6.0.17
+  '@types/chromecast-caf-sender':
+    specifier: ^1.0.10
+    version: 1.0.10(patch_hash=i4krnp2tujjy7m5t3eetgu6qby)
   '@types/simple-peer':
     specifier: ^9.11.8
     version: 9.11.8
@@ -373,12 +381,40 @@ packages:
     dev: true
     optional: true
 
+  /@types/chrome@0.0.270:
+    resolution: {integrity: sha512-ADvkowV7YnJfycZZxL2brluZ6STGW+9oKG37B422UePf2PCXuFA/XdERI0T18wtuWPx0tmFeZqq6MOXVk1IC+Q==}
+    dependencies:
+      '@types/filesystem': 0.0.36
+      '@types/har-format': 1.2.15
+    dev: true
+
   /@types/chromecast-caf-receiver@6.0.17:
     resolution: {integrity: sha512-vIKyzx7mQglRVJuDl/WE5ehPdAvW4VDShe5I8ewi/8IQjTQkMc1Gx/LjkcpVfxfSSvZ1VKHPbPlJLScgCuAIeg==}
     dev: true
 
+  /@types/chromecast-caf-sender@1.0.10(patch_hash=i4krnp2tujjy7m5t3eetgu6qby):
+    resolution: {integrity: sha512-B4iO+T4kMonmvIV+9xyWeIjxNWYVh6RyIQlFUeLk9fgQuXzHtFLnbnVwY7no5qshdUk9szKy0qbCWEMAjMkj4w==}
+    dependencies:
+      '@types/chrome': 0.0.270
+    dev: true
+    patched: true
+
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
+    dev: true
+
+  /@types/filesystem@0.0.36:
+    resolution: {integrity: sha512-vPDXOZuannb9FZdxgHnqSwAG/jvdGM8Wq+6N4D/d80z+D4HWH+bItqsZaVRQykAn6WEVeEkLm2oQigyHtgb0RA==}
+    dependencies:
+      '@types/filewriter': 0.0.33
+    dev: true
+
+  /@types/filewriter@0.0.33:
+    resolution: {integrity: sha512-xFU8ZXTw4gd358lb2jw25nxY9QAgqn2+bKKjKOYfNCzN4DKCFetK7sPtrlpg66Ywe3vWY9FNxprZawAh9wfJ3g==}
+    dev: true
+
+  /@types/har-format@1.2.15:
+    resolution: {integrity: sha512-RpQH4rXLuvTXKR0zqHq3go0RVXYv/YVqv4TnPH95VbwUxZdQlK1EtcMvQvMpDngHbt13Csh9Z4qT9AbkiQH5BA==}
     dev: true
 
   /@types/node@22.5.1:

@@ -28,6 +28,10 @@
         width: 0%;
         height: 0%;
       }
+
+      #cast-launcher-container {
+        position: absolute;
+      }
     </style>
   </head>
   <body>
@@ -42,5 +46,9 @@
     <audio id="audioElement" controls autoplay></audio>
     <script type="module" src="/src/main.ts"></script>
     <!-- <button id="start">Start</button> -->
+
+    <div id="cast-launcher-container">
+      <google-cast-launcher id="cast-launcher"></google-cast-launcher>
+    </div>
   </body>
 </html>
