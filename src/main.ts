@@ -68,7 +68,7 @@ async function applicationFactory() {
   const settings = await getSettings(chromecast);
 
   if (!chromecast.isTv()) {
-    new GoogleCastSender();
+    new GoogleCastSender(settings);
   }
 
   const dependencies = createDependencies(audioContext, settings);
