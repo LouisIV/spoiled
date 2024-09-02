@@ -55,10 +55,16 @@ export class ChromecastReceiver {
     }
   }
 
+  private checkUserAgent() {
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    return userAgent.includes("crkey") || userAgent.includes("google cast");
+  }
+
   isTv() {
     const capabilities = this.context.getDeviceCapabilities();
     if (capabilities) {
-      return capabilities.isTv;
+      return capabilities.isTv || this.checkUserAgent();
     }
 
     return false;
