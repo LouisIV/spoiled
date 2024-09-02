@@ -96,12 +96,12 @@ export class ChromecastReceiver {
   }
 
   private setupCustomDataListener() {
-    this.playerManager.addEventListener(
-      cast.framework.events.EventType.MEDIA_STATUS,
-      (event) => {
-        if (event.mediaStatus) {
-          const customData = event.mediaStatus.media?.customData;
-          this.setCustomData(customData);
+    const t = this;
+    this.context.addCustomMessageListener(
+      "urn:x-cast:spoiled.update-settings",
+      function (customEvent) {
+        if (customEvent.data.type == "update-settings") {
+          t.setCustomData(customEvent.data.settings);
         }
       }
     );

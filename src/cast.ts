@@ -29,14 +29,7 @@ export class GoogleCastSender {
     };
   }
 
-  castMedia() {
-    var mediaInfo = new chrome.cast.media.MediaInfo(
-      "https://louisiv.github.io/spoiled",
-      ""
-    );
-
-    mediaInfo.customData = encodeSettingsForCustomData(this.settings);
-
+  async updateSettings() {
     const castSession = this.castingContext.getCurrentSession();
 
     if (!castSession) {
@@ -44,18 +37,14 @@ export class GoogleCastSender {
       return;
     }
 
-    var request = new chrome.cast.media.LoadRequest(mediaInfo);
-    castSession.loadMedia(request).then(
-      function () {
-        console.log("Load succeed");
-      },
-      function (errorCode) {
-        console.log("Error code: " + errorCode);
-      }
-    );
+    await castSession.sendMessage("urn:x-cast:spoiled.update-settings", {
+      type: "update-settings",
+      settings: encodeSettingsForCustomData(this.settings),
+    });
   }
 
   onAPIAvailable() {
+    const t = this;
     console.log("Cast API configured");
 
     this.castingContext = (
@@ -89,6 +78,8 @@ export class GoogleCastSender {
               "Session started on device: " +
                 event.session.getCastDevice().friendlyName
             );
+            t.updateSettings();
+
             // Load media or perform other actions
             break;
           case (cast.framework as unknown as Framework).SessionState
@@ -98,8 +89,6 @@ export class GoogleCastSender {
         }
       }
     );
-
-    this.castMedia();
   }
 
   constructor(protected settings: Settings) {
