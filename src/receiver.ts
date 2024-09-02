@@ -43,11 +43,9 @@ export class ChromecastReceiver {
   ) => void;
 
   private context: Cast.framework.CastReceiverContext;
-  private playerManager: Cast.framework.PlayerManager;
 
   constructor() {
     this.context = cast.framework.CastReceiverContext.getInstance();
-    this.playerManager = this.context.getPlayerManager();
 
     if (this.isTv()) {
       this.setupCustomDataListener();
