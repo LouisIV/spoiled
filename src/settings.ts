@@ -3,7 +3,9 @@ import { ChromecastReceiver } from "./receiver";
 import { VideoSinkType, parseVideoSinkType } from "./video-sinks/types";
 
 export interface Settings {
-  audioSource: AudioSourceType;
+  requestVideoFromPeerId?: string;
+
+  audioSource?: AudioSourceType;
   videoSink?: VideoSinkType;
 
   /**
@@ -95,6 +97,11 @@ export async function getSettings(
     const playReceivedAudio = urlParams.get("playReceivedAudio");
     if (playReceivedAudio) {
       settings.playReceivedAudio = playReceivedAudio === "true";
+    }
+
+    const videoSink = urlParams.get("videoSink");
+    if (videoSink) {
+      settings.videoSink = parseVideoSinkType(videoSink);
     }
 
     const signalingServerUrl = urlParams.get("signalingServerUrl");

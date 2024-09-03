@@ -6,14 +6,15 @@ import { Microphone } from "./audio-sources/microphone";
 import { WebsocketAudio } from "./audio-sources/websocket";
 import { GoogleCastSender } from "./cast";
 import { WebRTCManager } from "./connections/peer";
+import { PeerJSWebRTCManager } from "./connections/peer-peerjs";
 import { ChromecastReceiver } from "./receiver";
 import { Settings, getSettings } from "./settings";
-import { VideoSinkFactory } from "./video-sinks/factory";
-import { VideoSinkType } from "./video-sinks/types";
 import { Butterchurn } from "./visualizer";
 
 // @ts-expect-error
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const audioContext = new (window.AudioContext || window.webkitAudioContext)({
+  sampleRate: 48000,
+});
 
 const canvas = document.getElementById("visualizerCanvas");
 
@@ -43,7 +44,7 @@ const canvas = document.getElementById("visualizerCanvas");
 
 // videoSink.captureVideoStream(canvas as HTMLCanvasElement);
 
-function createDependencies(
+function createAudioDependencies(
   audioContext: AudioContext,
   settings: Settings
 ): AudioSourceFactoryDependencies {
@@ -62,57 +63,94 @@ function createDependencies(
   return dependencies;
 }
 
+// function createVideoDependencies(
+//   audioDependencies: AudioSourceFactoryDependencies,
+//   settings: Settings
+// ): VideoSinkFactoryDependencies {
+//   const dependencies: VideoSinkFactoryDependencies = {};
+
+//   if (audioDependencies.webRTC) {
+//     dependencies.webRTC = audioDependencies.webRTC;
+//   }
+
+//   if (settings.websocketUrl) {
+//     dependencies.connection = new WebsocketConnection(settings.websocketUrl);
+//   }
+
+//   return dependencies;
+// }
+
 async function applicationFactory() {
   const chromecast = new ChromecastReceiver();
 
   const settings = await getSettings(chromecast);
+  const peerJSManager = new PeerJSWebRTCManager(canvas as HTMLCanvasElement);
+
+  const dependencies = createAudioDependencies(audioContext, settings);
 
   if (!chromecast.isTv()) {
-    new GoogleCastSender(settings);
+    new GoogleCastSender(settings, [peerJSManager]);
   }
 
-  const dependencies = createDependencies(audioContext, settings);
-
-  const audioSourceFactory = new AudioSourceFactory(audioContext, dependencies);
-  const audioSource = audioSourceFactory.createAudioSource(
-    settings.audioSource,
-    settings
-  );
-
-  if (audioSource instanceof WebsocketAudio) {
-    await audioSource.loadAudioWorklet();
-  }
-
-  if (audioSource instanceof WebRTCManager) {
-    await audioSource.incomingAudioAvailable();
-  }
-
-  try {
-    const butterchurn = new Butterchurn(
+  if (settings.audioSource) {
+    const audioSourceFactory = new AudioSourceFactory(
       audioContext,
-      canvas as HTMLCanvasElement
+      dependencies
+    );
+    const audioSource = audioSourceFactory.createAudioSource(
+      settings.audioSource,
+      settings
     );
 
-    const stream = await audioSource.getStream();
-    butterchurn.connectStream(stream);
+    if (audioSource instanceof WebsocketAudio) {
+      await audioSource.loadAudioWorklet();
+    }
 
-    butterchurn.render();
-  } catch (err) {
-    // Catch errors (for testing)
-    console.error(err);
+    if (audioSource instanceof WebRTCManager) {
+      await audioSource.incomingAudioAvailable();
+    }
+
+    try {
+      const butterchurn = new Butterchurn(
+        audioContext,
+        canvas as HTMLCanvasElement
+      );
+
+      const stream = await audioSource.getStream();
+      butterchurn.connectStream(stream);
+
+      butterchurn.render();
+    } catch (err) {
+      // Catch errors (for testing)
+      console.error(err);
+    }
+
+    if (settings.playReceivedAudio && !(audioSource instanceof Microphone)) {
+      const node = audioSource.getNode();
+      node.connect(audioContext.destination);
+    }
+
+    if (audioContext.state === "suspended") {
+      audioContext.resume().then(() => {
+        console.log("AudioContext resumed");
+      });
+    }
   }
 
-  if (settings.playReceivedAudio && !(audioSource instanceof Microphone)) {
-    const node = audioSource.getNode();
-    node.connect(audioContext.destination);
+  if (settings.requestVideoFromPeerId) {
+    peerJSManager.callPeer(settings.requestVideoFromPeerId);
   }
 
   if (settings.videoSink) {
-    const videoSinkFactory = new VideoSinkFactory();
-    const videoSink = videoSinkFactory.createVideoSink(
-      VideoSinkType.MediaRecorder
-    );
+    console.log("Creating video sink");
+    // const videoDependencies = createVideoDependencies(dependencies, settings);
 
+    const videoSink = peerJSManager;
+
+    // const videoSinkFactory = new VideoSinkFactory(videoDependencies);
+    // const videoSink = videoSinkFactory.createVideoSink(settings.videoSink);
+
+    console.log("Capturing video stream");
     videoSink?.captureVideoStream(canvas as HTMLCanvasElement);
   }
 }

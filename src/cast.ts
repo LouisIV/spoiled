@@ -1,4 +1,5 @@
 import type { cast as Cast, framework } from "chromecast-caf-sender";
+import { OutgoingSettingModifier } from "./common/outgoing-setting-modifier";
 import { Settings, encodeSettingsForCustomData } from "./settings";
 import { loadScript } from "./util/load-script";
 
@@ -37,9 +38,17 @@ export class GoogleCastSender {
       return;
     }
 
+    let currentSettings = { ...this.settings };
+
+    if (this.outgoingSettingModifiers) {
+      for (const modifier of this.outgoingSettingModifiers) {
+        currentSettings = modifier.modifyOutgoingSettings(currentSettings);
+      }
+    }
+
     await castSession.sendMessage("urn:x-cast:spoiled.update-settings", {
       type: "update-settings",
-      settings: encodeSettingsForCustomData(this.settings),
+      settings: encodeSettingsForCustomData(currentSettings),
     });
   }
 
@@ -78,6 +87,7 @@ export class GoogleCastSender {
               "Session started on device: " +
                 event.session.getCastDevice().friendlyName
             );
+
             t.updateSettings();
 
             // Load media or perform other actions
@@ -91,7 +101,10 @@ export class GoogleCastSender {
     );
   }
 
-  constructor(protected settings: Settings) {
+  constructor(
+    protected settings: Settings,
+    protected outgoingSettingModifiers?: OutgoingSettingModifier[]
+  ) {
     this.loadCastAPI();
   }
 }
