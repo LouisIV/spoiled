@@ -55,7 +55,9 @@ export async function getSettings(
       throw new Error("Custom data was not provided!");
     }
 
-    settings.audioSource = parseAudioSourceType(customData["audioSource"]);
+    if (customData["audioSource"]) {
+      settings.audioSource = parseAudioSourceType(customData["audioSource"]);
+    }
 
     if (customData["audioUrl"]) {
       settings.audioUrl = customData["audioUrl"];

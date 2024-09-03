@@ -46,6 +46,8 @@ export class GoogleCastSender {
       }
     }
 
+    console.log("updateSettings", { currentSettings });
+
     await castSession.sendMessage("urn:x-cast:spoiled.update-settings", {
       type: "update-settings",
       settings: encodeSettingsForCustomData(currentSettings),
@@ -55,6 +57,13 @@ export class GoogleCastSender {
   onAPIAvailable() {
     const t = this;
     console.log("Cast API configured");
+
+    const castContainer = document.getElementById("cast-launcher-container");
+    if (!castContainer) {
+      throw new Error("Cast container not found!");
+    }
+    const castElement = document.createElement("google-cast-launcher");
+    castContainer.appendChild(castElement);
 
     this.castingContext = (
       cast.framework as unknown as Framework
