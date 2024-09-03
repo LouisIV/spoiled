@@ -105,6 +105,15 @@ export class ChromecastReceiver {
 
   private setupCustomDataListener() {
     const t = this;
+
+    this.context.sendCustomMessage(
+      "urn:x-cast:spoiled.provide-peer-id",
+      undefined,
+      {
+        peerId: undefined,
+      }
+    );
+
     this.context.addCustomMessageListener(
       "urn:x-cast:spoiled.update-settings",
       function (customEvent) {
