@@ -59,6 +59,10 @@ export async function getSettings(
       settings.audioSource = parseAudioSourceType(customData["audioSource"]);
     }
 
+    if (customData["requestVideoFromPeerId"]) {
+      settings.requestVideoFromPeerId = customData["requestVideoFromPeerId"];
+    }
+
     if (customData["audioUrl"]) {
       settings.audioUrl = customData["audioUrl"];
     }
@@ -89,6 +93,11 @@ export async function getSettings(
     const audioSource = urlParams.get("audioSource");
     if (audioSource) {
       settings.audioSource = parseAudioSourceType(audioSource);
+    }
+
+    const requestVideoFromPeerId = urlParams.get("requestVideoFromPeerId");
+    if (requestVideoFromPeerId) {
+      settings.requestVideoFromPeerId = requestVideoFromPeerId;
     }
 
     const audioUrl = urlParams.get("audioUrl");

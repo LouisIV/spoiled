@@ -59,6 +59,16 @@ export class ChromecastReceiver {
     return userAgent.includes("crkey") || userAgent.includes("google cast");
   }
 
+  providePeerId(peerId: string) {
+    this.context.sendCustomMessage(
+      "urn:x-cast:spoiled.provide-peer-id",
+      undefined,
+      {
+        peerId: peerId,
+      }
+    );
+  }
+
   isTv() {
     const capabilities = this.context.getDeviceCapabilities();
     if (capabilities) {

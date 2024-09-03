@@ -138,7 +138,11 @@ async function applicationFactory() {
   }
 
   if (settings.requestVideoFromPeerId) {
-    peerJSManager.callPeer(settings.requestVideoFromPeerId);
+    peerJSManager.callPeer(peerJSManager.peer.id);
+
+    if (chromecast.isTv()) {
+      chromecast.providePeerId(peerJSManager.peer.id);
+    }
   }
 
   if (settings.videoSink) {

@@ -52,6 +52,13 @@ export class GoogleCastSender {
       type: "update-settings",
       settings: encodeSettingsForCustomData(currentSettings),
     });
+
+    castSession.addMessageListener(
+      "urn:x-cast:spoiled.provide-peer-id",
+      (namespace, message) => {
+        console.log({ namespace, message });
+      }
+    );
   }
 
   onAPIAvailable() {
